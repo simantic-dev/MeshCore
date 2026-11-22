@@ -21,6 +21,11 @@ Single node: `sim NRF52840QIAA run --board sim/rak.board --elf sim/merged_sw.hex
 - `MESH_AIR_LOG=1` prints TX/RX air events and payload hex to stderr.
 
 ## Results
+![advert relay a -> r -> c, from MESH_AIR_LOG](relay.gif)
+
+Rerun 2026-11-22 (rebuilt, sim 0.10.6, `--record`): rung 3 timings hold. a TX start 12.226172 s, 127 B, 857 ms on air (ends 13.083260 s); r TX start 14.407822 s,
+128 B, ends 15.264910 s; c TX start 15.840465 s, 129 B, ends 16.697553 s. 1.023 G insns per node, 37.0 s wall, ~40 MIPS/node. The GIF is made by
+`sim/make_gif.py <MESH_AIR_LOG stderr>`; its numbers are the TX start/done lines of that run.
 - Rung 1 (single node, 12 s virtual): boots, identity generated and saved to LittleFS, `RX Boosted Gain Mode: Enabled` (SX1262 init ok),
   no fault, no S140 assert (repeater env has no Bluefruit init, so the Meshtastic 7.9 s assert path is not exercised; NVMC question left open).
 - Rung 2 (2 nodes, 16 s virtual): b `advert` at 12.215 s -> 857 ms on air (SF8 BW62.5 CR4/5, 127 B) -> a RX 13.078 s, `valid advertisement

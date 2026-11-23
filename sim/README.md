@@ -6,7 +6,7 @@ Meshtastic run (simantic-dev/meshtastic-firmware `sim-demo`).
 ## Run (from repo root)
     EXTRA="-DMESH_DEBUG=1 -DMESH_PACKET_LOGGING=1 -UUSE_CC310_HW_CRYPTO" sim/build.sh RAK_4631_repeater merged_sw
     sim run --scenario sim/two.yaml   --usb-cdc-console a.usbd --usb-cdc-console $'b.usbd=advert\r' --ascii --timeout 16
-    MESH_LINKS=0-1,1-2 sim run --scenario sim/three.yaml --usb-cdc-console r.usbd --usb-cdc-console c.usbd --usb-cdc-console $'a.usbd=advert\r' --ascii --timeout 22
+    sim run --scenario sim/three.yaml --usb-cdc-console r.usbd --usb-cdc-console c.usbd --usb-cdc-console $'a.usbd=advert\r' --ascii --timeout 22
 Single node: `sim NRF52840QIAA run --board sim/rak.board --elf sim/merged_sw.hex --usb-cdc-console usbd --ascii --timeout 12`.
 `--on-fault stop` is single-machine only. A scenario takes one `elf:`, hence the merged MBR+S140+app hex.
 
@@ -15,12 +15,18 @@ Single node: `sim NRF52840QIAA run --board sim/rak.board --elf sim/merged_sw.hex
   offered to every other node (`_air_start`), which applies the existing RX match (mode, SF, BW, CR, sync, IQ, freq) and time-on-air
   from SF/BW/CR (DS.SX1261-2 6.1.4). Unit gain, fixed RSSI -60 / SNR 10, no collisions or capture: MODELED SIMPLIFICATION.
   Both nodes transmitting at once hear nothing (half duplex), which happens when two identical boots advertise at the same virtual time.
-- `MESH_LINKS="0-1,1-2"`: reachability by machine order; unset = all hear all.
+- Reachability: the scenario's `type: lora` media (pyrite#4211); `three.yaml` has a-r and r-c, so a and c do not hear each other.
 - Registers 0x0819-0x081C return per-node PRNG bits (RadioLib randomByte). MeshCore seeds its identity from them, so without this
   every node generated the same keypair. MODELED SIMPLIFICATION (silicon: wideband noise).
 - `MESH_AIR_LOG=1` prints TX/RX air events and payload hex to stderr.
 
 ## Results
+
+On the pyrite lora medium (PR #4212 build, 2026-11-22, load 4-5): `three.yaml` has two `type: lora` media instead of `quantum:` + `MESH_LINKS`,
+effective quantum 912 us. TX start a 12.222810 s, r 14.404450 s, c 15.837085 s; r and c log `valid advertisement received!` at 13.192572 s and
+15.374241 s. `PYRITE_PARALLEL=0` and threaded give identical times and instruction counts (1.023468 G / 1.023464 G / 1.023464 G).
+Wall 54.3 s serial, 26.4 s threaded (was 37.0 s threaded at 10 us). The GIF and rerun below are the earlier shared-air peer.
+
 ![advert relay a -> r -> c, from MESH_AIR_LOG](relay.gif)
 
 Rerun 2026-11-22 (rebuilt, sim 0.10.6, `--record`): rung 3 timings hold. a TX start 12.226172 s, 127 B, 857 ms on air (ends 13.083260 s); r TX start 14.407822 s,

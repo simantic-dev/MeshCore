@@ -1,6 +1,7 @@
-# Two RAK4631 MeshCore repeaters on one shared LoRa air. Run from the repo root: sim run --scenario sim/two.yaml
-quantum: 0.00001
+# Two RAK4631 MeshCore repeaters on one lora medium. Run from the repo root: sim run --scenario sim/two.yaml
 timeout: 25
 machines:
   a: { mcu: NRF52840QIAA, elf: merged_sw.hex, overlay: rak.board }
   b: { mcu: NRF52840QIAA, elf: merged_sw.hex, overlay: rak.board }
+media:
+  - { type: lora, connect: [a.radio, b.radio] }

@@ -1,7 +1,9 @@
-# a - r - c in a line: a and c are out of each other's range (MESH_LINKS=0-1,1-2). Run from repo root with the env set.
-quantum: 0.00001
+# a - r - c in a line: a and c are out of each other's range (two lora media, a-r and r-c). Run from repo root.
 timeout: 40
 machines:
   a: { mcu: NRF52840QIAA, elf: merged_sw.hex, overlay: rak.board }
   r: { mcu: NRF52840QIAA, elf: merged_sw.hex, overlay: rak.board }
   c: { mcu: NRF52840QIAA, elf: merged_sw.hex, overlay: rak.board }
+media:
+  - { type: lora, connect: [a.radio, r.radio] }
+  - { type: lora, connect: [r.radio, c.radio] }
